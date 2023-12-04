@@ -4,7 +4,11 @@ const config = {
   authorizeUrl: "http://auth.algafood.local:8081/oauth/authorize",
   tokenUrl: "http://auth.algafood.local:8081/oauth/token",
   callbackUrl: "http://www.foodanalytics.local:8082",
-  cozinhasUrl: "http://api.algafood.local:8080/v1/kitchens"
+  cozinhasUrl: "http://api.algafood.local:8080/v1/kitchens",
+  basicUsername: "algafood-web",
+  basicPassword: "web123",
+  bodyUsername: "thiago",
+  bodyPassword: "123"
 };
 
 let accessToken = "";
@@ -62,6 +66,41 @@ function consultar() {
 }
 
 function gerarAccessToken(code) {
+  alert("Gerando access token com public key");
+
+  let clientAuth = btoa(config.basicUsername + ":" + config.basicPassword);
+  alert("ClientAuth " + clientAuth);
+
+  alert("Username:password " + config.bodyUsername + ":" + config.bodyPassword);
+
+  let params = new URLSearchParams();
+  params.append("grant_type", "password");
+  params.append("username", config.bodyUsername);
+  params.append("password", config.bodyPassword);
+
+  $.ajax({
+    url: config.tokenUrl,
+    type: "post",
+    data: params.toString(),
+    contentType: "application/x-www-form-urlencoded",
+
+    beforeSend: function(request) {
+      request.setRequestHeader("Authorization", "Basic " + clientAuth);
+    },
+
+    success: function(response) {
+      accessToken = response.access_token;
+
+      alert("Access token gerado com public key: " + accessToken);
+    },
+
+    error: function(error) {
+      alert("Erro ao gerar access key com public key");
+    }
+  });
+}
+
+function gerarAccessTokenOld2(code) {
   alert("Gerando access token com code com pkce " + code);
 
   let clientAuth = btoa(config.clientId + ":" + config.clientSecret);
